@@ -7,6 +7,7 @@ import LoginView from '../views/LoginView.vue';
 import LogoutView from '../views/LogoutView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import RandomToneRowView from '../views/RandomToneRowView.vue';
+import ToneRowMatrixView from '../views/ToneRowMatrixView.vue';
 
 
 /**
@@ -54,6 +55,14 @@ const routes = [
     path: "/randomToneRow",
     name: "randomToneRow",
     component: RandomToneRowView,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/tonerowmatrix",
+    name: "toneRowMatrix",
+    component: ToneRowMatrixView,
     meta: {
       requiresAuth: true
     }

@@ -4,29 +4,37 @@
       <h1>Random Tone Row</h1>
       <button v-on:click="createRandomToneRow">Build Random ToneRow</button>
     </div>
-    <div class="tone-grid">
+    <div class="tone-grid d-flex flex-nowrap">
       <div class="grid-item" v-for="tone in toneRowArray" v-bind:key="tone">
         {{ tone }}
       </div>
     </div>
     <div class="header-container">
       <h1>Tone Row by Pitch Class</h1>
-      <button v-on:click="createPitchClassSharp">
-        View Pitch Class in Sharps
-      </button>
-      <button v-on:click="createPitchClassFlat">
-        View Pitch Class in Flats
-      </button>
+      <div class="button-group d-flex flex-nowrap">
+        <button v-on:click="createPitchClassSharp">
+          View Pitch Class in Sharps
+        </button>
+        <button v-on:click="createPitchClassFlat">
+          View Pitch Class in Flats
+        </button>
+      </div>
     </div>
-    <div class="tone-grid">
+    <div v-if="isPitchClassVisible" class="tone-grid d-flex flex-nowrap">
       <div
         class="grid-item"
         v-for="pitch in pitchClassArray"
         v-bind:key="pitch"
-        @mouseover="playSound(pitch)"
+        @mouseover="onNoteMouseOver(pitch)"
       >
         {{ pitch.note }}
       </div>
+    </div>
+    <div class="header-container">
+      <h1>Tone Row Matrix</h1>
+      <button v-on:click="$router.push({ name: 'toneRowMatrix' })">
+        View Tone Row Matrix
+      </button>
     </div>
     <p v-if="outOfOrderMessage" class="error-message">
       {{ outOfOrderMessage }}
@@ -38,8 +46,6 @@
 export default {
   data() {
     return {
-      toneRowArray: [],
-      pitchClassArray: [],
       outOfOrder: 0,
       outOfOrderMessage: "",
     };
@@ -50,7 +56,7 @@ export default {
       let toneRowSet = new Set();
       while (toneRowSet.size < 12) {
         toneRowSet.add(Math.floor(Math.random() * 12));
-        this.toneRowArray = Array.from(toneRowSet);
+        this.$store.dispatch("updateToneRowArray", Array.from(toneRowSet));
       }
       console.log(this.toneRowArray);
       this.outOfOrder = 1;
@@ -60,7 +66,6 @@ export default {
         this.outOfOrderMessage = "Please build a random tone row first";
       }
 
-      this.pitchClassArray = [];
       const SharpTones = Object.freeze({
         0: { note: "C", frequency: 261.63 },
         1: { note: "C#", frequency: 277.18 },
@@ -75,18 +80,17 @@ export default {
         10: { note: "A#", frequency: 466.16 },
         11: { note: "B", frequency: 493.88 },
       });
+      const pitchClassArray = this.toneRowArray.map((tone) => SharpTones[tone]);
+      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
 
-      for (let pitch of this.toneRowArray) {
-        this.pitchClassArray.push(SharpTones[pitch]);
-      }
-      console.log(this.pitchClassArray);
+      // console.log(this.pitchClassArray);
+      console.log(this.$store.getters.getPitchClassArray);
     },
     createPitchClassFlat() {
       if (this.outOfOrder === 0) {
         this.outOfOrderMessage = "Please build a random tone row first";
       }
 
-      this.pitchClassArray = [];
       const FlatTones = Object.freeze({
         0: { note: "C", frequency: 261.63 },
         1: { note: "Db", frequency: 277.18 },
@@ -101,36 +105,31 @@ export default {
         10: { note: "Bb", frequency: 466.16 },
         11: { note: "B", frequency: 493.88 },
       });
-      for (let pitch of this.toneRowArray) {
-        this.pitchClassArray.push(FlatTones[pitch]);
-      }
+      const pitchClassArray = this.toneRowArray.map((tone) => FlatTones[tone]);
+      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
+
       console.log(this.pitchClassArray);
     },
     resetState() {
       this.outOfOrder = 0;
       this.outOfOrderMessage = "";
-      this.pitchClassArray = [];
-      this.toneRowArray = [];
+      this.$store.dispatch("resetState");
+      // this.pitchClassArray = [];
+      // this.toneRowArray = [];
     },
-    /**
-     * Plays a sound based on the given pitch frequency during mouseover.
-     *
-     * @param {Object} pitch - An object containing information about the pitch to play.
-     * @param {number} pitch.frequency - The frequency of the pitch to play.
-     */
-    playSound(pitch) {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioContext();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      oscillator.type = "sawtooth";
-      oscillator.frequency.value = pitch.frequency;
-      gainNode.gain.value = 0.5;
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + 1.5);
-      console.log("playing " + pitch.note);
+    onNoteMouseOver(pitch) {
+      this.$store.dispatch("playSound", pitch);
+    },
+  },
+  computed: {
+    toneRowArray() {
+      return this.$store.getters.getToneRowArray;
+    },
+    pitchClassArray() {
+      return this.$store.getters.getPitchClassArray;
+    },
+    isPitchClassVisible() {
+      return this.$store.getters.getIsPitchClassVisible;
     },
   },
 };
@@ -139,18 +138,23 @@ export default {
 <style scoped>
 .header-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
 }
 .tone-grid {
+  overflow-x: auto; /* Allows horizontal scrolling if the viewport is too small */
   display: flex;
-  flex-wrap: wrap; /* Allows items to wrap to the next line if needed */
   gap: 10px; /* Space between grid items */
   justify-content: center; /* Center items horizontally */
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 .grid-item {
+  white-space: nowrap; /* Prevents the text from breaking */
+  font-size: 1rem; /*Default size*/
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,9 +169,23 @@ export default {
 .grid-item:hover {
   background-color: #b0e57c; /* Background color on hover */
 }
+.button-group {
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
 
 .error-message {
+  font-weight: bold;
+  font-size: 28px;
   color: red;
   margin-top: 20px;
+}
+@media (max-width: 576px) {
+  .grid-item {
+    font-size: 0.8rem;
+  }
 }
 </style>
