@@ -58,6 +58,7 @@ export default {
         toneRowSet.add(Math.floor(Math.random() * 12));
         this.$store.dispatch("updateToneRowArray", Array.from(toneRowSet));
       }
+      console.log(toneRowSet);
       console.log(this.toneRowArray);
       this.outOfOrder = 1;
     },
@@ -80,12 +81,26 @@ export default {
         10: { note: "A#", frequency: 466.16 },
         11: { note: "B", frequency: 493.88 },
       });
-      const pitchClassArray = this.toneRowArray.map((tone) => SharpTones[tone]);
-      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
+      const toneRowArray = this.$store.getters.getToneRowArray;
+      const pitchClassArray = toneRowArray.map((tone, index) => {
+        let baseZero = index === 0 ? 0 : 12 - toneRowArray[0] + tone;
 
-      // console.log(this.pitchClassArray);
+        if (baseZero > 11) {
+          baseZero -= 12;
+        }
+
+        return {
+          pitchValue: tone,
+          baseZero: baseZero,
+          note: SharpTones[tone].note,
+          frequency: SharpTones[tone].frequency,
+        };
+      });
+
+      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
       console.log(this.$store.getters.getPitchClassArray);
     },
+
     createPitchClassFlat() {
       if (this.outOfOrder === 0) {
         this.outOfOrderMessage = "Please build a random tone row first";
@@ -105,17 +120,29 @@ export default {
         10: { note: "Bb", frequency: 466.16 },
         11: { note: "B", frequency: 493.88 },
       });
-      const pitchClassArray = this.toneRowArray.map((tone) => FlatTones[tone]);
-      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
+      const toneRowArray = this.$store.getters.getToneRowArray;
+      const pitchClassArray = toneRowArray.map((tone, index) => {
+        let baseZero = index === 0 ? 0 : 12 - toneRowArray[0] + tone;
 
-      console.log(this.pitchClassArray);
+        if (baseZero > 11) {
+          baseZero -= 12;
+        }
+
+        return {
+          pitchValue: tone,
+          baseZero: baseZero,
+          note: FlatTones[tone].note,
+          frequency: FlatTones[tone].frequency,
+        };
+      });
+
+      this.$store.dispatch("updatePitchClassArray", pitchClassArray);
+      console.log(this.$store.getters.getPitchClassArray);
     },
     resetState() {
       this.outOfOrder = 0;
       this.outOfOrderMessage = "";
       this.$store.dispatch("resetState");
-      // this.pitchClassArray = [];
-      // this.toneRowArray = [];
     },
     onNoteMouseOver(pitch) {
       this.$store.dispatch("playSound", pitch);
@@ -136,6 +163,9 @@ export default {
 </script>
 
 <style scoped>
+button {
+  border-radius: 4px;
+}
 .header-container {
   display: flex;
   flex-direction: column;

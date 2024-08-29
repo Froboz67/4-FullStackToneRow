@@ -3,6 +3,9 @@
     <div class="header-container">
       <h1>Tone Row Matrix</h1>
       <h1>Tone Row by Pitch Class</h1>
+      <button v-on:click="$router.push({ name: 'randomToneRow' })">
+        Back to Tone Row
+      </button>
     </div>
     <div class="tone-grid d-flex flex-nowrap">
       <div
@@ -14,6 +17,7 @@
         {{ pitch.note }}
       </div>
     </div>
+    <button v-on:click="buildToneRowMatrix">Build Tone Row</button>
   </div>
 </template>
 
@@ -21,6 +25,7 @@
 export default {
   computed: {
     pitchClassArray() {
+      console.log(this.$store.state.pitchClassArray);
       return this.$store.state.pitchClassArray;
     },
   },
@@ -28,11 +33,35 @@ export default {
     onNoteMouseOver(pitch) {
       this.$store.dispatch("playSound", pitch);
     },
+    backToRandomToneRow() {
+      this.$state.isPitchClassVisible = false;
+      this.$router.push({ name: "randomToneRow" });
+    },
+    buildToneRowMatrix() {
+      let matrix = [];
+      matrix = this.$store.state.pitchClassArray;
+      console.log("this is the matrix: ", matrix);
+      let outputString = "";
+      for (let [index, pitch] of matrix.entries()) {
+        outputString += `${index}: | ${pitch.pitchValue} | ${pitch.baseZero} | ${pitch.note} | ${pitch.frequency} `;
+      }
+      console.log("This is the complete toneRow object: ", outputString);
+      // let primeRows = [];
+      // primeRows.push({
+      //   pitchValue: // matrix index where the baseZero is 2
+      //   baseZero: // matrix index where the baseZero is 2
+      //   note: // matrix index where the baseZero is 2
+      //   frequency: // matrix index where the baseZero is 2
+      // })
+    },
   },
 };
 </script>
 
 <style scoped>
+button {
+  border-radius: 4px;
+}
 .header-container {
   display: flex;
   flex-direction: column;
@@ -45,6 +74,8 @@ export default {
   display: flex;
   gap: 10px;
   justify-content: center;
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 .grid-item {

@@ -60,7 +60,7 @@ export function createStore(currentToken, currentUser) {
         const gainNode = audioContext.createGain();
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        oscillator.type = "sawtooth";
+        oscillator.type = "sine";
         oscillator.frequency.value = pitch.frequency;
         gainNode.gain.value = 0.5;
         oscillator.start();
