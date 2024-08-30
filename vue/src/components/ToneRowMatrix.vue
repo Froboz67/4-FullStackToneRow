@@ -2,30 +2,47 @@
   <div>
     <div class="header-container">
       <h1>Tone Row Matrix</h1>
-      <h1>Tone Row by Pitch Class</h1>
-      <button v-on:click="$router.push({ name: 'randomToneRow' })">
+      <button
+        v-on:click="
+          this.resetState();
+          $router.push({ name: 'randomToneRow' });
+        "
+      >
         Back to Tone Row
       </button>
+      <h1>Tone Row by Pitch Class</h1>
+
+      <div class="button-group">
+        <button v-on:click="buildToneRowMatrix">Build Tone Row Matrix</button>
+        <button>View Pitch Class</button>
+      </div>
     </div>
-    <div class="tone-grid d-flex flex-nowrap">
+    <div class="tone-grid">
       <div
         class="grid-item"
-        v-for="pitch in pitchClassArray"
-        v-bind:key="pitch"
+        v-for="(pitch, index) in matrix"
+        v-bind:key="index"
         @mouseover="onNoteMouseOver(pitch)"
       >
         {{ pitch.note }}
       </div>
     </div>
-    <button v-on:click="buildToneRowMatrix">Build Tone Row</button>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      matrix: [],
+    };
+  },
   computed: {
     pitchClassArray() {
-      console.log(this.$store.state.pitchClassArray);
+      console.log(
+        "this is pitchClassArray: ",
+        this.$store.state.pitchClassArray
+      );
       return this.$store.state.pitchClassArray;
     },
   },
@@ -38,21 +55,70 @@ export default {
       this.$router.push({ name: "randomToneRow" });
     },
     buildToneRowMatrix() {
+      // the matrix is the complete toneRow matrix
       let matrix = [];
-      matrix = this.$store.state.pitchClassArray;
+      // this assigns the matrix to the pitchClassArray
+      matrix = [...this.$store.state.pitchClassArray];
       console.log("this is the matrix: ", matrix);
-      let outputString = "";
-      for (let [index, pitch] of matrix.entries()) {
-        outputString += `${index}: | ${pitch.pitchValue} | ${pitch.baseZero} | ${pitch.note} | ${pitch.frequency} `;
+
+      // this array holds the first row of the matrix only filled with P0 values
+      let primeZero = [];
+      primeZero = matrix.map((baseZero) => {
+        return {
+          pitchValue: baseZero.pitchValue,
+          baseZero: baseZero.baseZero,
+          note: baseZero.note,
+          frequency: baseZero.frequency,
+        };
+      });
+      console.log("line 64 - This is primeZero: ", primeZero);
+      // this loop builds each row of the matrix
+      let primeRows = [];
+      for (let eachRow = 1; eachRow < 12; eachRow++) {
+        primeRows[0] = 12 - primeZero[eachRow].baseZero;
+        console.log(
+          "this is primeZero[eachRow]: ",
+          primeZero[eachRow] + "|" + eachRow
+        );
+        console.log("this is primeRows[0]: ", primeRows[0]);
+        console.log("this is primeRows: ", primeRows);
+        const matchingZeroElement = matrix.find(
+          (element) => element.baseZero === primeRows[0]
+        );
+        matrix.push({
+          pitchValue: matchingZeroElement.pitchValue,
+          baseZero: matchingZeroElement.baseZero,
+          note: matchingZeroElement.note,
+          frequency: matchingZeroElement.frequency,
+        });
+        // loop for each column of the matrix
+        for (let eachColumn = 1; eachColumn < 12; eachColumn++) {
+          // calculate the value for primeRows[eachColumn] based on primeZero[eachColumn] and primeRows[0]
+          // primeRows[0] will always be the next row in the matrix
+
+          const calculateBaseZero =
+            (primeZero[eachColumn].baseZero + primeRows[0]) % 12;
+
+          // find the matching element in the matrix
+          const matchingElement = matrix.find(
+            (element) => element.baseZero === calculateBaseZero
+          );
+
+          matrix.push({
+            pitchValue: matchingElement.pitchValue,
+            baseZero: matchingElement.baseZero,
+            note: matchingElement.note,
+            frequency: matchingElement.frequency,
+          });
+        }
       }
-      console.log("This is the complete toneRow object: ", outputString);
-      // let primeRows = [];
-      // primeRows.push({
-      //   pitchValue: // matrix index where the baseZero is 2
-      //   baseZero: // matrix index where the baseZero is 2
-      //   note: // matrix index where the baseZero is 2
-      //   frequency: // matrix index where the baseZero is 2
-      // })
+      this.matrix = matrix;
+      console.log("this is primeRows: ", primeRows);
+      console.log("this is matrix: ", matrix);
+      console.log("this is the pitchClassArray: ", this.pitchClassArray);
+    },
+    resetState() {
+      this.matrix = [];
     },
   },
 };
@@ -70,29 +136,42 @@ button {
   margin-bottom: 20px;
 }
 .tone-grid {
-  overflow-x: auto; /* Allows horizontal scrolling if the viewport is too small */
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(
+    12,
+    minmax(20px, 1fr)
+  ); /* 12 columns that shrink but won't go below 40px */
+  grid-template-rows: repeat(12, 1fr); /* 12 equal-height rows */
+  gap: 5px; /* Space between grid items */
   margin-left: 2%;
   margin-right: 2%;
+  margin: 0 auto;
+  /* width: 100%; Allow grid to take full width */
+  max-width: 600px; /* Maximum width of 600px */
 }
 
 .grid-item {
-  white-space: nowrap; /* Prevents the text from breaking */
-  font-size: 1rem; /*Default size*/
+  white-space: nowrap;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px; /* Adjust width as needed */
-  height: 50px; /* Adjust height as needed */
+  padding: 10px;
   background-color: #f0f0f0; /* Background color */
   border: 1px solid #ddd; /* Border around items */
   border-radius: 4px; /* Rounded corners (optional) */
+  font-size: 1rem; /* Default font size */
   transition: background-color 0.3s; /* Transition for hover effect */
 }
 .grid-item:hover {
   background-color: #b0e57c; /* Background color on hover */
+}
+.button-group {
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 @media (max-width: 576px) {

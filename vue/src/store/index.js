@@ -8,6 +8,7 @@ export function createStore(currentToken, currentUser) {
       user: currentUser || {},
       toneRowArray: [],
       pitchClassArray: [],
+
       isPitchClassVisible: false
     },
     mutations: {
@@ -27,14 +28,17 @@ export function createStore(currentToken, currentUser) {
         state.user = {};
         axios.defaults.headers.common = {};
       },
-      setToneRowArray(state, toneRowArray) {
+      SET_TONE_ROW_ARRAY(state, toneRowArray) {
         state.toneRowArray = toneRowArray
       },
-      setPitchClassArray(state, pitchClassArray) {
+      SET_PITCH_CLASS_ARRAY(state, pitchClassArray) {
         state.pitchClassArray = pitchClassArray;
         state.isPitchClassVisible = true;
       },
-      resetState(state) {
+      SET_MATRIX(state, matrix) {
+        state.matrix = matrix;
+      },
+      RESET_STATE(state) {
         // console.log("before reset - isPitchClassVisible:", this.$store.getIsPitchClassVisible(state));
         state.toneRowArray = [];
         state.pitchClassArray = [];
@@ -43,15 +47,16 @@ export function createStore(currentToken, currentUser) {
       }
     },
     actions: {
+
       updateToneRowArray({ commit }, toneRowArray) {
-        commit('setToneRowArray', toneRowArray)
+        commit('SET_TONE_ROW_ARRAY', toneRowArray)
       },
       updatePitchClassArray({ commit }, pitchClassArray) {
-        commit('setPitchClassArray', pitchClassArray)
+        commit('SET_PITCH_CLASS_ARRAY', pitchClassArray)
       },
-      resetState({ commit }) {
-        console.log("dispatching resetState");
-        commit('resetState');
+      RESET_STATE({ commit }) {
+        console.log("dispatching RESET_STATE");
+        commit('RESET_STATE');
       },
       playSound({ commit }, pitch) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -77,6 +82,9 @@ export function createStore(currentToken, currentUser) {
       },
       getIsPitchClassVisible(state) {
         return state.isPitchClassVisible;
+      },
+      getMatrix(state) {
+        return state.matrix;
       }
     }
   });

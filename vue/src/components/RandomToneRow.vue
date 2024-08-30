@@ -59,7 +59,7 @@ export default {
         this.$store.dispatch("updateToneRowArray", Array.from(toneRowSet));
       }
       console.log(toneRowSet);
-      console.log(this.toneRowArray);
+      console.log("toneRowArray: ", this.toneRowArray);
       this.outOfOrder = 1;
     },
     createPitchClassSharp() {
@@ -98,7 +98,7 @@ export default {
       });
 
       this.$store.dispatch("updatePitchClassArray", pitchClassArray);
-      console.log(this.$store.getters.getPitchClassArray);
+      console.log("pitchclass array: ", this.$store.getters.getPitchClassArray);
     },
 
     createPitchClassFlat() {
