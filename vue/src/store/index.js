@@ -8,8 +8,12 @@ export function createStore(currentToken, currentUser) {
       user: currentUser || {},
       toneRowArray: [],
       pitchClassArray: [],
-
-      isPitchClassVisible: false
+      isPitchClassVisible: false,
+      matrix: [],
+      audioContext: null,
+      oscillator: null,
+      gainNode: null,
+      isPlaying: false
     },
     mutations: {
       SET_AUTH_TOKEN(state, token) {
@@ -44,6 +48,14 @@ export function createStore(currentToken, currentUser) {
         state.pitchClassArray = [];
         state.isPitchClassVisible = false;
         // console.log("after reset - isPitchClassVisible:", this.$store.getIsPitchClassVisible(state));
+      },
+      SET_PLAYING_STATE(state, isPlaying) {
+        state.isPlaying = isPlaying;
+      },
+      SET_AUDIO_NODES(state, { audioContext, oscillator, gainNode }) {
+        state.audioContext = audioContext;
+        state.oscillator = oscillator;
+        state.gainNode = gainNode;
       }
     },
     actions: {
@@ -58,19 +70,38 @@ export function createStore(currentToken, currentUser) {
         console.log("dispatching RESET_STATE");
         commit('RESET_STATE');
       },
-      playSound({ commit }, pitch) {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioContext();
+      playSound({ state, commit }, pitch) {
+
+        if (state.isPlaying) return; // Prevent starting a new sound if one is already playing
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('AudioContext initialized');
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
+
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        oscillator.type = "sine";
+
+        oscillator.type = 'sine';
         oscillator.frequency.value = pitch.frequency;
         gainNode.gain.value = 0.5;
+
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + 1.5);
-        console.log("playing " + pitch.note);
+        commit('SET_AUDIO_NODES', { audioContext, oscillator, gainNode });
+        commit('SET_PLAYING_STATE', true);
+      },
+      stopSound({ state, commit }) {
+        if (!state.isPlaying) return; // Prevent stopping if no sound is playing
+        state.gainNode.gain.setValueAtTime(0.5, state.audioContext.currentTime);
+        state.gainNode.gain.exponentialRampToValueAtTime(0.00001, state.audioContext.currentTime + .02);
+        // state.oscillator.stop();
+        commit('SET_PLAYING_STATE', false);
+
+        // Clean up nodes to release 
+        state.oscillator.disconnect();
+        state.gainNode.disconnect();
+        state.audioContext.close();
+        console.log("AudioContext closed");
       },
     },
     getters: {

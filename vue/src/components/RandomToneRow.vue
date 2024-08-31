@@ -25,7 +25,8 @@
         class="grid-item"
         v-for="pitch in pitchClassArray"
         v-bind:key="pitch"
-        @mouseover="onNoteMouseOver(pitch)"
+        @mouseenter="onNoteMouseEnter(pitch)"
+        @mouseleave="onNoteMouseLeave(pitch)"
       >
         {{ pitch.note }}
       </div>
@@ -142,10 +143,13 @@ export default {
     resetState() {
       this.outOfOrder = 0;
       this.outOfOrderMessage = "";
-      this.$store.dispatch("resetState");
+      this.$store.dispatch("RESET_STATE");
     },
-    onNoteMouseOver(pitch) {
+    onNoteMouseEnter(pitch) {
       this.$store.dispatch("playSound", pitch);
+    },
+    onNoteMouseLeave(pitch) {
+      this.$store.dispatch("stopSound", pitch);
     },
   },
   computed: {

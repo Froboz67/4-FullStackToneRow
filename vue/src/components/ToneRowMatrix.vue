@@ -19,10 +19,11 @@
     </div>
     <div class="tone-grid">
       <div
-        class="grid-item"
+        class="grid-item d-flex flex-nowrap"
         v-for="(pitch, index) in matrix"
         v-bind:key="index"
         @mouseover="onNoteMouseOver(pitch)"
+        @mouseleave="onNoteMouseLeave(pitch)"
       >
         {{ pitch.note }}
       </div>
@@ -50,6 +51,10 @@ export default {
     onNoteMouseOver(pitch) {
       this.$store.dispatch("playSound", pitch);
     },
+    onNoteMouseLeave(pitch) {
+      this.$store.dispatch("stopSound", pitch);
+    },
+
     backToRandomToneRow() {
       this.$state.isPitchClassVisible = false;
       this.$router.push({ name: "randomToneRow" });
