@@ -1,29 +1,34 @@
 BEGIN TRANSACTION;
 
+DROP TABLE IF EXISTS tonerow;
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS state;
 
 CREATE TABLE users (
-	user_id SERIAL,
-	username varchar(50) NOT NULL UNIQUE,
-	password_hash varchar(200) NOT NULL,
-	role varchar(50) NOT NULL,
-	CONSTRAINT PK_user PRIMARY KEY (user_id)
+    user_id SERIAL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(200) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    CONSTRAINT PK_user PRIMARY KEY (user_id)
 );
 
-CREATE TABLE state (
-	state_abbreviation char(2) NOT NULL,
-	state_name varchar(50) NOT NULL,
-	population int NOT NULL,
-	area int NOT NULL,
-	capital int /*NOT*/ NULL, --temporarily nullable because it's a foreign key to city.city_id
-	sales_tax numeric(5,3) NOT NULL,
-	state_nickname varchar(100) NULL,
-	census_region varchar(10) NULL,
-	CONSTRAINT PK_state PRIMARY KEY(state_abbreviation),
-	CONSTRAINT UQ_state_name UNIQUE(state_name),
-    CONSTRAINT UQ_state_nickname UNIQUE(state_nickname),
-	CONSTRAINT CHK_census_region CHECK (census_region IS NULL OR census_region IN ('Northeast', 'South', 'Midwest', 'West'))
+CREATE TABLE tonerow (
+	id SERIAL
+	, name VARCHAR(56) NOT NULL UNIQUE
+	, pzero INT NOT NULL
+	, pone INT NOT NULL
+	, ptwo INT NOT NULL
+	, pthree INT NOT NULL
+	, pfour INT NOT NULL
+	, pfive INT NOT NULL
+	, psix INT NOT NULL
+	, pseven INT NOT NULL
+	, peight INT NOT NULL
+	, pnine INT NOT NULL
+	, pten INT NOT NULL
+	, peleven INT NOT NULL
+	, user_id INT NOT NULL
+	, CONSTRAINT PK_tonerow PRIMARY KEY (id)
+	, CONSTRAINT FK_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 COMMIT TRANSACTION;
