@@ -8,6 +8,8 @@ import LogoutView from '../views/LogoutView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import RandomToneRowView from '../views/RandomToneRowView.vue';
 import ToneRowMatrixView from '../views/ToneRowMatrixView.vue';
+import ToneRowView from '../views/ToneRowView.vue';
+import ToneRowDetails from '../components/ToneRowDetails.vue';
 
 
 /**
@@ -66,7 +68,21 @@ const routes = [
     meta: {
       requiresAuth: true
     }
+  },
+  {
+    path: "/tonerow/",
+    name: "tonerow",
+    component: ToneRowView,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/tonerow/:id",
+    name: "toneRowDetails",
+    component: ToneRowDetails,
   }
+
 ];
 
 // Create the router

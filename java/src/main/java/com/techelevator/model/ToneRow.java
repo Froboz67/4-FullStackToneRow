@@ -4,6 +4,7 @@ public class ToneRow {
 
     private int id;
     private String name;
+    private int startingPitchValue;
     private int pZero;
     private int pOne;
     private int pTwo;
@@ -17,10 +18,11 @@ public class ToneRow {
     private int pTen;
     private int pEleven;
 
-    public ToneRow(int id, String name, int pZero, int pOne, int pTwo, int pThree, int pFour, int pFive, int pSix,
+    public ToneRow(int id, String name, int startingPitchValue, int pZero, int pOne, int pTwo, int pThree, int pFour, int pFive, int pSix,
                    int pSeven, int pEight, int pNine, int pTen, int pEleven) {
         this.id = id;
         this.name = name;
+        this.startingPitchValue = startingPitchValue;
         this.pZero = pZero;
         this.pOne = pOne;
         this.pTwo = pTwo;
@@ -45,6 +47,10 @@ public class ToneRow {
 
     public String getName() {
         return name;
+    }
+
+    public int getStartingPitchValue() {
+        return startingPitchValue;
     }
 
     public int getpZero() {
@@ -101,6 +107,10 @@ public class ToneRow {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setStartingPitchValue(int startingPitchValue) {
+        this.startingPitchValue = startingPitchValue;
     }
 
     public void setpZero(int pZero) {

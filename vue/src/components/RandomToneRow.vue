@@ -33,12 +33,26 @@
     </div>
     <div class="header-container">
       <h1>Tone Row Matrix</h1>
-      <button v-on:click="$router.push({ name: 'toneRowMatrix' })">
-        View Tone Row Matrix
-      </button>
+      <div class="button-group d-flex flex-nowrap">
+        <button v-on:click="$router.push({ name: 'toneRowMatrix' })">
+          View Tone Row Matrix
+        </button>
+        <button v-if="!isSaving" v-on:click="toggleSaveInput">
+          Save Tone Row
+        </button>
+        <div v-else>
+          <input
+            type="text"
+            v-model="toneRowName"
+            placeholder="Enter Tone Row Name"
+          />
+          <button v-on:click="saveToneRow">Save</button>
+          <button v-on:click="toggleSaveInput">Cancel</button>
+        </div>
+      </div>
     </div>
     <p v-if="outOfOrderMessage" class="error-message">
-      {{ outOfOrderMessage }}
+      {{ this.outOfOrderMessage }}
     </p>
   </div>
 </template>
@@ -49,6 +63,9 @@ export default {
     return {
       outOfOrder: 0,
       outOfOrderMessage: "",
+      toneRow: [],
+      isSaving: false,
+      toneRowName: "",
     };
   },
   methods: {
@@ -97,7 +114,7 @@ export default {
           frequency: SharpTones[tone].frequency,
         };
       });
-
+      this.outOfOrder = 2;
       this.$store.dispatch("updatePitchClassArray", pitchClassArray);
       console.log("pitchclass array: ", this.$store.getters.getPitchClassArray);
     },
@@ -136,7 +153,7 @@ export default {
           frequency: FlatTones[tone].frequency,
         };
       });
-
+      this.outOfOrder = 2;
       this.$store.dispatch("updatePitchClassArray", pitchClassArray);
       console.log(this.$store.getters.getPitchClassArray);
     },
@@ -150,6 +167,44 @@ export default {
     },
     onNoteMouseLeave(pitch) {
       this.$store.dispatch("stopSound", pitch);
+    },
+    saveToneRow() {
+      const pitchClassArray = this.pitchClassArray;
+
+      const toneRowPayload = {
+        name: this.toneRowName, // TODO: get name from user }, // TODO: get name from user
+        statingPitchValue: pitchClassArray[0].pitchValue,
+        pZero: pitchClassArray[0].baseZero,
+        pOne: pitchClassArray[1].baseZero,
+        pTwo: pitchClassArray[2].baseZero,
+        pThree: pitchClassArray[3].baseZero,
+        pFour: pitchClassArray[4].baseZero,
+        pFive: pitchClassArray[5].baseZero,
+        pSix: pitchClassArray[6].baseZero,
+        pSeven: pitchClassArray[7].baseZero,
+        pEight: pitchClassArray[8].baseZero,
+        pNine: pitchClassArray[9].baseZero,
+        pTen: pitchClassArray[10].baseZero,
+        pEleven: pitchClassArray[11].baseZero,
+        user_id: 1, // TODO: get user id from user
+      };
+      this.$store.dispatch("saveToneRow", toneRowPayload);
+
+      this.isSaving = false;
+      this.toneRowName = "";
+    },
+    toggleSaveInput() {
+      console.log(this.outOfOrder);
+      if (this.outOfOrder === 0) {
+        this.outOfOrderMessage = "Please build a random tone row first";
+      }
+      const pitchClassArray = this.pitchClassArray;
+
+      if (!pitchClassArray || pitchClassArray.length === 0) {
+        this.outOfOrderMessage = "Please choose sharps of flats to display";
+        return;
+      }
+      this.isSaving = !this.isSaving;
     },
   },
   computed: {
@@ -184,6 +239,7 @@ button {
   justify-content: center; /* Center items horizontally */
   margin-left: 2%;
   margin-right: 2%;
+  margin-bottom: 2%;
 }
 
 .grid-item {

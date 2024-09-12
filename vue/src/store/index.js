@@ -103,6 +103,25 @@ export function createStore(currentToken, currentUser) {
         state.audioContext.close();
         console.log("AudioContext closed");
       },
+      async saveToneRow({ state }, toneRowPayload) {
+        console.log("ToneRowService.saveToneRow()", toneRowPayload);
+        try {
+          const response = await axios.post('/tonerow', toneRowPayload, {
+            headers: {
+              Authorization: `Bearer ${state.token}`,
+            },
+          });
+
+          if (response.status === 200) {
+            console.log("ToneRowService.saveToneRow() - success", response.data);
+
+          } else {
+            console.log("ToneRowService.saveToneRow() - error", response.data);
+          }
+        } catch (error) {
+          console.log("ToneRowService.saveToneRow() - error", error);
+        }
+      }
     },
     getters: {
       getToneRowArray(state) {

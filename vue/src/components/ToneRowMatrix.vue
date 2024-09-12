@@ -10,22 +10,24 @@
       >
         Back to Tone Row
       </button>
-      <h1>Tone Row by Pitch Class</h1>
+      <!-- <h1>Tone Row by Pitch Class</h1> -->
 
       <div class="button-group">
-        <button v-on:click="buildToneRowMatrix">Build Tone Row Matrix</button>
-        <button>View Pitch Class</button>
+        <button v-on:click="showByNote">Show Matrix by Note Name</button>
+        <button v-on:click="showByNumber">Show Matrix by Pitch Class</button>
+        <button v-on:click="playRandomPitch">play note</button>
       </div>
     </div>
     <div class="tone-grid">
       <div
         class="grid-item d-flex flex-nowrap"
+        :class="{ highlighted: pitch.isHighlighted }"
         v-for="(pitch, index) in matrix"
         v-bind:key="index"
         @mouseover="onNoteMouseOver(pitch)"
         @mouseleave="onNoteMouseLeave(pitch)"
       >
-        {{ pitch.note }}
+        {{ pitch[currentDisplay] }}
       </div>
     </div>
   </div>
@@ -36,6 +38,7 @@ export default {
   data() {
     return {
       matrix: [],
+      currentDisplay: "",
     };
   },
   computed: {
@@ -58,6 +61,14 @@ export default {
     backToRandomToneRow() {
       this.$state.isPitchClassVisible = false;
       this.$router.push({ name: "randomToneRow" });
+    },
+    showByNote() {
+      this.currentDisplay = "note";
+      this.buildToneRowMatrix();
+    },
+    showByNumber() {
+      this.currentDisplay = "baseZero";
+      this.buildToneRowMatrix();
     },
     buildToneRowMatrix() {
       // the matrix is the complete toneRow matrix
@@ -125,6 +136,41 @@ export default {
     resetState() {
       this.matrix = [];
     },
+    async playRandomPitch() {
+      if (this.matrix.length === 0) {
+        console.log("Matrix is empty. Cannot play a pitch.");
+        return;
+      }
+
+      // Choose a random pitch from the matrix
+      const randomIndex = Math.floor(Math.random() * this.matrix.length);
+      const selectedPitch = this.matrix[randomIndex];
+
+      // Temporarily highlight the selected pitch
+      this.matrix[randomIndex] = {
+        ...selectedPitch,
+        isHighlighted: true,
+      };
+
+      // Play the sound
+      this.$store.dispatch("playSound", selectedPitch);
+
+      // Update the matrix to trigger re-render
+      this.matrix = [...this.matrix];
+
+      // Wait for 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Stop the sound and remove the highlight
+      this.$store.dispatch("stopSound", selectedPitch);
+      this.matrix[randomIndex] = {
+        ...selectedPitch,
+        isHighlighted: false,
+      };
+
+      // Update the matrix to revert the highlight
+      this.matrix = [...this.matrix];
+    },
   },
 };
 </script>
@@ -177,6 +223,9 @@ button {
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+.grid-item.highlighted {
+  background-color: #a0d9a1; /* Light green for highlighted item */
 }
 
 @media (max-width: 576px) {

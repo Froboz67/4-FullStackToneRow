@@ -14,6 +14,7 @@ CREATE TABLE users (
 CREATE TABLE tonerow (
 	id SERIAL
 	, name VARCHAR(56) NOT NULL UNIQUE
+	, starting_pitch_value INT NOT NULL
 	, pzero INT NOT NULL
 	, pone INT NOT NULL
 	, ptwo INT NOT NULL
