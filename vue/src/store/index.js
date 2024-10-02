@@ -119,6 +119,14 @@ export function createStore(currentToken, currentUser) {
             console.log("ToneRowService.saveToneRow() - error", response.data);
           }
         } catch (error) {
+          if (error.response && error.response.status === 409) {
+            console.log("ToneRowService.saveToneRow() - duplicate name error", error.response.data);
+            alert("Tone Row Name Already Exists, Please choose a different name");
+          } else {
+            console.log("ToneRowService.saveToneRow() - error", error);
+            alert("Error Saving Tone Row, Please Try Again");
+          }
+
           console.log("ToneRowService.saveToneRow() - error", error);
         }
       }

@@ -172,7 +172,7 @@ export default {
       const pitchClassArray = this.pitchClassArray;
 
       const toneRowPayload = {
-        name: this.toneRowName, // TODO: get name from user }, // TODO: get name from user
+        name: this.toneRowName,
         statingPitchValue: pitchClassArray[0].pitchValue,
         pZero: pitchClassArray[0].baseZero,
         pOne: pitchClassArray[1].baseZero,
@@ -186,7 +186,7 @@ export default {
         pNine: pitchClassArray[9].baseZero,
         pTen: pitchClassArray[10].baseZero,
         pEleven: pitchClassArray[11].baseZero,
-        user_id: 1, // TODO: get user id from user
+        user_id: this.$store.state.user.id,
       };
       this.$store.dispatch("saveToneRow", toneRowPayload);
 

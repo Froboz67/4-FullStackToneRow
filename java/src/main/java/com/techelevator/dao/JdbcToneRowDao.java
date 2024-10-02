@@ -2,22 +2,30 @@ package com.techelevator.dao;
 
 import com.techelevator.exception.DaoException;
 import com.techelevator.model.ToneRow;
+import com.techelevator.model.User;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class JdbcToneRowDao implements ToneRowDao{
 
     private JdbcTemplate jdbcTemplate;
+    private final UserDao userDao;
 
-    public JdbcToneRowDao(JdbcTemplate jdbcTemplate) {
+
+    public JdbcToneRowDao(JdbcTemplate jdbcTemplate, UserDao userDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userDao = userDao;
     }
 
     @Override
@@ -52,7 +60,8 @@ public class JdbcToneRowDao implements ToneRowDao{
     }
     @Override
     public ToneRow saveToneRow(ToneRow toneRow) {
-        ToneRow saveToneRow = null;
+        ToneRow saveToneRow;
+
         final String sql = "INSERT INTO tonerow(\n" +
                 "\tname, starting_pitch_value, pzero, pone, ptwo, pthree, pfour, pfive, psix, pseven, peight, pnine, pten, peleven, user_id)\n" +
                 "\tVALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n" +
@@ -61,15 +70,23 @@ public class JdbcToneRowDao implements ToneRowDao{
             int newToneRowId = jdbcTemplate.queryForObject(sql,int.class,toneRow.getName(), toneRow.getStartingPitchValue(), toneRow.getpZero(),
                     toneRow.getpOne(), toneRow.getpTwo(), toneRow.getpThree(), toneRow.getpFour(), toneRow.getpFive(),
                     toneRow.getpSix(), toneRow.getpSeven(), toneRow.getpEight(), toneRow.getpNine(), toneRow.getpTen(),
-                    toneRow.getpEleven(), 1);
-
+                    toneRow.getpEleven(), toneRow.getUser_id());
+            System.out.println("userId number is : " + toneRow.getUser_id());
             saveToneRow = getToneRowById(newToneRowId);
+            System.out.println("toneRow Id number is : " + newToneRowId);
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
         } catch (DataIntegrityViolationException e) {
-            throw new DaoException("Data integrity violation", e);
+            if (Objects.requireNonNull(e.getMessage()).contains("unique constraint")) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "ToneRow name taken. Please choose a different name.");
+            } else {
+                throw new DaoException("Data integrity violation", e);
+            }
         }
         return saveToneRow;
+    }
+    public ToneRow deleteToneRow(ToneRow toneRow) {
+        return null;
     }
 
     ToneRow mapRowToTonerow(SqlRowSet rowSet) {
@@ -89,6 +106,7 @@ public class JdbcToneRowDao implements ToneRowDao{
         toneRow.setpNine(rowSet.getInt("pnine"));
         toneRow.setpTen(rowSet.getInt("pten"));
         toneRow.setpEleven(rowSet.getInt("peleven"));
+        toneRow.setUser_id(rowSet.getInt("user_id"));
 
         return toneRow;
 

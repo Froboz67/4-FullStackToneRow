@@ -17,9 +17,10 @@ public class ToneRow {
     private int pNine;
     private int pTen;
     private int pEleven;
+    private int user_id;
 
     public ToneRow(int id, String name, int startingPitchValue, int pZero, int pOne, int pTwo, int pThree, int pFour, int pFive, int pSix,
-                   int pSeven, int pEight, int pNine, int pTen, int pEleven) {
+                   int pSeven, int pEight, int pNine, int pTen, int pEleven, int userId) {
         this.id = id;
         this.name = name;
         this.startingPitchValue = startingPitchValue;
@@ -35,6 +36,7 @@ public class ToneRow {
         this.pNine = pNine;
         this.pTen = pTen;
         this.pEleven = pEleven;
+        this.user_id = userId;
     }
 
     public ToneRow() {
@@ -101,6 +103,10 @@ public class ToneRow {
         return pEleven;
     }
 
+    public int getUser_id() {
+        return user_id;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -159,5 +165,9 @@ public class ToneRow {
 
     public void setpEleven(int pEleven) {
         this.pEleven = pEleven;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 }
